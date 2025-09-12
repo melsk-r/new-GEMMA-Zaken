@@ -1,0 +1,260 @@
+#
+# Deze regels controleren op conformiteit met de ZGW API Design Rules.
+#
+functions:
+  - checkRedundantTitle
+  - discriminatorPropertyExists
+  - enumDescriptions
+functionsDir: "./functions"
+
+rules:
+  #
+  # Rule 1: Ensures all $refs are not URLs (no http(s) URLs)
+  #
+  # See https://swagger.io/docs/specification/v3_0/using-ref/#ref-syntax for
+  # the nomanclature of $refs (local, remote, URLs).
+  #
+  # Examples:
+  #     $ref:  "#/components/schemas/User"              (good)
+  #     $ref:  "https://example.com/schemas/User.yaml"  (bad)
+  #     oneOf: ["https://example.com/schemas/Pet.yaml"] (bad)
+  #     allOf: ["#/components/schemas/Pet"]             (good)
+  #     items: "https://example.com/schemas/Item.yaml"  (bad)
+  #     not:   "#/components/schemas/Invalid"           (good)
+  #
+  no-url-refs:
+    description: References should not be URLs (no HTTP/HTTPS URLs allowed)
+    message: "URL references are not allowed. Use local or remote references only."
+    severity: error
+    given:
+      - "$..$ref"
+      - "$..oneOf[*]"
+      - "$..allOf[*]"
+      - "$..anyOf[*]"
+      - "$..not"
+      - "$..items"
+    then:
+      function: pattern
+      functionOptions:
+        notMatch: "^https?://"
+
+  # Rule 2: Ensures that xOf contains at least two entries
+  #         if there is no other scheme info. Otherwise it can
+  #         be replaced by a single $ref.
+  #
+  # Valid examples:
+  #   allOf:
+  #     - $ref: "#/components/schemas/User"
+  #     - type: object
+  #       properties:
+  #         name:
+  #           type: string
+  #
+  #   allOf:
+  #     - $ref: "#/components/schemas/User"
+  #     - $ref: "#/components/schemas/Profile"
+  #
+  # Invalid example:
+  #   allOf:
+  #     - $ref: "#/components/schemas/User"    # single entry not allowed
+  no-standalone-xof:
+    description: Suggests using direct reference instead of standalone single-entry allOf
+    message:
+      Consider replacing standalone single-entry allOf with a direct reference, as no additional
+      properties are being defined
+    severity: warn
+    given: $..*
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          if:
+            type: object
+            maxProperties: 1
+            anyOf:
+              - properties:
+                  allOf:
+                    type: array
+                    maxItems: 1
+                required: [allOf]
+              - properties:
+                  oneOf:
+                    type: array
+                    maxItems: 1
+                required: [oneOf]
+              - properties:
+                  anyOf:
+                    type: array
+                    maxItems: 1
+                required: [anyOf]
+          then: false
+
+  # Rule 3: Ensures that allOf children are explicitly typed as objects
+  # Example:
+  #   allOf:
+  #     - $ref: "#/components/schemas/BaseType"
+  #     - type: object        # Must explicitly declare type: object
+  #       properties:
+  #         newProperty:
+  #           type: string
+  #
+  # Invalid examples:
+  #   allOf:
+  #     - type: string       # Wrong - must be object
+  #     - properties: {}     # Wrong - missing type: object
+  #
+  allof-children-must-be-objects:
+    description: Children of allOf must be objects
+    message: "allOf children must explicitly declare type: object"
+    severity: error
+    resolved: false
+    given: "$.components.schemas.*.allOf[*]"
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          oneOf:
+            - type: object
+              required:
+                - $ref
+              properties:
+                $ref:
+                  type: string
+            - type: object
+              required:
+                - type
+              properties:
+                type:
+                  const: object
+
+  # Rule 4: Warns against mixin-style patterns where schemas just combine other schemas
+  #
+  # Invalid example:
+  #   allOf:
+  #     - $ref: '#/components/schemas/AutorisatieBase'
+  #     - $ref: '#/components/schemas/zrcAutorisatie'
+  #
+  # Valid example (consolidated):
+  #     allOf:
+  #       - $ref: '#/components/schemas/AutorisatieBase'
+  #       - type: object
+  #         properties:
+  #           zaaktype:
+  #             type: string
+  #           ...
+  no-mixin-patterns:
+    description: Avoid mixin patterns (only $refs in allOf).
+    message: "allOf at {{path}} contains only $refs and might be a mixin pattern."
+    severity: error
+    resolved: false
+    given: "$..allOf"
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          not:
+            type: array
+            minItems: 2
+            items:
+              type: object
+              required:
+                - $ref
+              not:
+                required:
+                  - type
+
+  # Rule 5: Detects redundant titles that match their property names
+  # Examples:
+  #   applicatieId:
+  #     title: ApplicatieId         # Bad - redundant
+  #   geometrie:
+  #     title: "Geometrie  "        # Bad - redundant
+  #   subAdresBuitenland:
+  #     title: sub_adres_buitenland # Bad - redundant
+  #   name:
+  #     title: Full Name            # Good - adds information
+  no-redundant-titles:
+    description: Title should not be a redundant copy of the property name
+    message: "{{error}}"
+    severity: warn
+    given:
+      # Case 1: Property titles
+      - "$..properties.*"
+      # Case 2: Parameter schema titles
+      - "$..parameters[*]"
+      # Case 3: Component schema titles
+      - "$.components.schemas.*"
+      # Case 4: Array item titles in relation to the array title
+      - "$..items"
+    then:
+      function: checkRedundantTitle
+
+  # Rule 6: Ensures that discriminators have proper mappings defined
+  # Example:
+  #   discriminator:         # if this exists
+  #     propertyName: type
+  #     mapping:             # then this must exist
+  #       type1: '#/components/schemas/Type1'
+  #       type2: '#/components/schemas/Type2'
+  discriminator-mapping-required:
+    description: Discriminators must include explicit mappings
+    message: "Discriminator must include a 'mapping' object."
+    severity: error
+    given: "$.components.schemas.*.discriminator"
+    then:
+      field: mapping
+      function: truthy
+
+  # Rule 7: Ensures that discriminator propertyName is properly defined
+  # Example:
+  #   discriminator:
+  #     propertyName: myType  # Must exist and not be empty
+  #   properties:
+  #     myType:               # This field must exist
+  #       type: string
+  discriminator-property-exists:
+    description: Discriminator must have a valid propertyName
+    message: "{{error}}"
+    severity: error
+    given: "$.components.schemas[?(@.discriminator)]"
+    then:
+      function: discriminatorPropertyExists
+
+  # Rule 8: Ensures response schemas are not named after status codes
+  # Example:
+  # components:
+  #   responses:
+  #     '200':  # Bad - should not be named like a status code
+  #       description: OK
+  #       content:
+  #         application/json:
+  #           schema:
+  #             $ref: '#/components/schemas/ResponseSchema'
+  #      UserNotFound:   # OK - valid name for a generic response
+  #
+  response-pascal-case:
+    description: Response names should be PascalCase
+    message: "Response name should be PascalCase in {{property}}"
+    severity: error
+    given: $.components.responses.*~
+    then:
+      function: casing
+      functionOptions:
+        type: pascal
+
+  # Rule 9: Makes sure that if a x-enumDescriptions is used, it is used 1:1
+  # with the enum values.
+  # Example:
+  # enum:
+  #  - value1
+  #  - value2
+  # x-enumDescriptions:
+  #   value1: Description for value1
+  #   value2: Description for value2
+  matching-enum-descriptions:
+    description: Enum descriptions should be used 1:1 with the enum values
+    message: "Enum descriptions should be used 1:1 with the enum values in {{property}}"
+    severity: error
+    given: "$..[?(@ && @.enum && @['x-enumDescriptions'])]"
+    then:
+      function: enumDescriptions

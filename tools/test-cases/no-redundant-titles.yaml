@@ -1,0 +1,69 @@
+--- # Test 1
+openapi: 3.0.4
+info:
+  title: Test API
+x-tools-validator:
+  id: no-redundant-titles-test-1
+  spectral:
+    should-hit:
+      - no-redundant-titles
+  zgw-cleaner:
+    should-clean-to: no-redundant-titles-test-1-cleaned
+    should-hit:
+      - no-redundant-titles
+components:
+  schemas:
+    TestObject:
+      type: object
+      title: testobject
+--- # Test 1 cleaned
+openapi: 3.0.4
+info:
+  title: Test API
+x-tools-validator:
+  id: no-redundant-titles-test-1-cleaned
+  spectral:
+    should-miss:
+      - no-redundant-titles
+  zgw-cleaner:
+    should-clean-to: no-redundant-titles-test-1-cleaned
+    should-miss:
+      - no-redundant-titles
+components:
+  schemas:
+    TestObject:
+      type: object
+--- # Test 2
+openapi: 3.0.4
+info:
+  title: Test API
+x-tools-validator:
+  id: no-redundant-titles-test-2
+  spectral:
+    should-hit:
+      - no-redundant-titles
+  zgw-cleaner:
+    should-clean-to: no-redundant-titles-test-1-cleaned
+    should-hit:
+      - no-redundant-titles
+components:
+  schemas:
+    TestObject:
+      type: object
+      title: Test_object
+--- # Test 3
+openapi: 3.0.4
+info:
+  title: Test API
+x-tools-validator:
+  id: no-redundant-titles-test-3
+  spectral:
+    should-hit:
+      - no-redundant-titles
+components:
+  schemas:
+    TestObject:
+      type: array
+      items:
+        type: object
+        title: Test_object

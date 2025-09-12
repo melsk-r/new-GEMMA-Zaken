@@ -1,0 +1,17 @@
+# EditorConfig helps maintain consistent coding styles
+# across different editors and IDEs
+
+# This file is the topmost EditorConfig file
+root = true
+
+# We define default settings for all files
+# based on a plain text file edited on a unix
+[*]
+end_of_line = lf
+insert_final_newline = true
+charset = utf-8
+indent_style = space
+trim_trailing_whitespace = true
+
+# Language-specific formatting (YAML, Markdown, etc.)
+# is handled by dedicated linter configurations

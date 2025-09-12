@@ -1,0 +1,33 @@
+# Local development environment artifacts
+.idea/
+*~
+*.kate-swp
+*.swo
+*.swp
+*.bak
+*.autosave
+.vscode/
+!.vscode/extensions.json
+!.vscode/launch.json
+
+# Operating system artifacts
+.directory
+.DS_Store
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# Dependencies
+node_modules/
+
+# Build artifacts
+build/
+__pycache__/
+*.pyc
+.docusaurus/
+
+# Runtime generated logfiles
+# ...
+
+# Sensitive information
+# ...
