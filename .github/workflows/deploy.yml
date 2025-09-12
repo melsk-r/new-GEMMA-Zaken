@@ -1,8 +1,7 @@
 on:
   push:
     branches:
-      - master
-      - documentatie-update
+      - main
   workflow_dispatch:
 
 jobs:
