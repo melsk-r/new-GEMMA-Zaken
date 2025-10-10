@@ -23,6 +23,28 @@ function HomepageHeader() {
   );
 }
 
+function ZGWtopnavigatie() {
+  const { siteConfig } = useDocusaurusContext();
+  return (
+      <div>
+			<div>
+			  <Link className="button button--secondary" to="/">
+				ZGW API's
+			  </Link>&nbsp;&nbsp;&nbsp;
+			  <Link className="button button--secondary" to="/gids/tools">
+				Gids
+			  </Link>&nbsp;&nbsp;&nbsp;
+			  <Link className="button button--secondary" to="/v1/next">
+				API Suite
+			  </Link>&nbsp;&nbsp;&nbsp;
+			  <Link className="button button--secondary" to="/community">
+				Community
+			  </Link>
+			</div>
+      </div>
+  );
+}
+
 export default function Home() {
   const { siteConfig } = useDocusaurusContext();
   return (
@@ -30,6 +52,7 @@ export default function Home() {
       title={`Home | ${siteConfig.title}`}
       description="Description will go into a meta tag in <head />"
     >
+      <ZGWtopnavigatie />
       <HomepageHeader />
       <main>
         <HomepageFeatures />

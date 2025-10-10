@@ -6,15 +6,15 @@ import type { Config } from "@docusaurus/types";
 import type * as Plugin from "@docusaurus/types/src/plugin";
 import type * as OpenApiPlugin from "docusaurus-plugin-openapi-docs";
 import { themes as prismThemes } from "prism-react-renderer";
+import fetch from "node-fetch";
 // import { remarkKroki } from 'remark-kroki';
 
 const config: Config = {
   title: "API's voor zaakgericht werken",
   tagline: "De officiële standaard met gids, referentiedocumentatie en tools.",
   url: "https://vng-realisatie.github.io/",
-  baseUrl: "/new-GEMMA-Zaken",
+  baseUrl: "/new-GEMMA-Zaken-Sandbox",
   onBrokenLinks: "throw",
-  onBrokenMarkdownLinks: "warn",
   favicon: "img/favicon.ico",
 
   // GitHub pages deployment config.
@@ -84,46 +84,7 @@ const config: Config = {
         "Deze documentatie wordt momenteel bijgewerkt en is nog niet up-to-date.",
       isCloseable: false,
     },
-    navbar: {
-      title: "ZGW API's",
-      logo: {
-        alt: "VNG logo",
-        src: "img/vng_logo.svg",
-        srcDark: "img/vng_logo_alt.svg",
-      },
-      items: [
-        {
-          type: "doc",
-          docId: "gids/tools",
-          position: "left",
-          label: "Gids",
-        },
-        {
-          type: "doc",
-          docId: "index",
-          position: "left",
-          label: "API Suite",
-          docsPluginId: "v1",
-        },
-        {
-          type: "doc",
-          docId: "community/index",
-          position: "left",
-          label: "Community",
-        },
-        {
-          type: "docsVersionDropdown",
-          docsPluginId: "v1",
-          position: "right",
-        },
-        {
-          href: "https://github.com/vng-realisatie/gemma-zaken",
-          position: "right",
-          className: "header-github-link",
-          "aria-label": "GitHub repository",
-        },
-      ],
-    },
+    navbar: {},
     footer: {
       style: "dark",
       links: [
@@ -278,11 +239,49 @@ const config: Config = {
     remarkRehypeOptions: {
       footnoteLabel: "Voetnoten",
     },
+	hooks: {
+      onBrokenMarkdownLinks: "warn",
+	},
   },
 
   themes: ["@docusaurus/theme-mermaid", "docusaurus-theme-openapi-docs"],
 };
 
-export default async function createConfig() {
+
+// De async functie die de config exporteert
+export default async function createConfig(): Promise<Config> {
+  try {
+    const response = await fetch(
+      "https://raw.githubusercontent.com/melsk-r/Docusaurus-test/main/sharednavbar.json"
+    );
+
+    if (!response.ok) {
+      throw new Error(`Fout bij ophalen navbar: ${response.statusText}`);
+    }
+
+    const navbar = await response.json();
+
+    // Injecteer de opgehaalde items in de config
+    //config.themeConfig!.navbar!.items = navbarItems;
+    config.themeConfig!.navbar = navbar;
+  } catch (error) {
+    console.warn("Kon externe navbar niet ophalen:", error);
+    // Optioneel: fallback items
+    //config.themeConfig!.navbar!.items = [
+    config.themeConfig!.navbar = {
+      navbar: {
+        title: "ZGW API's",
+        logo: {
+          alt: "VNG logo",
+          src: "img/vng_logo.svg",
+          srcDark: "img/vng_logo_alt.svg",
+        },
+        items: [
+          { label: "Fallback", to: "/" },
+	    ],
+	  },
+    };
+  }
+
   return config;
 }
