@@ -13,7 +13,7 @@ const config: Config = {
   title: "API's voor zaakgericht werken",
   tagline: "De officiële standaard met gids, referentiedocumentatie en tools.",
   url: "https://vng-realisatie.github.io/",
-  baseUrl: "/new-GEMMA-Zaken-Sandbox",
+  baseUrl: "new-GEMMA-Zaken/",
   onBrokenLinks: "throw",
   favicon: "img/favicon.ico",
 
