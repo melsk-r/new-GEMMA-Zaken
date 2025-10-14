@@ -1,0 +1,5 @@
+[
+  { "label": "Voorbeelden", "to": "/voorbeelden" },
+  { "label": "Contact", "to": "/contact" },
+  { "label": "Besluitenlogboek", "to": "/adrs" }
+]

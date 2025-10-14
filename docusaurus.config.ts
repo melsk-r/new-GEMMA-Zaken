@@ -13,7 +13,11 @@ const config: Config = {
   title: "API's voor zaakgericht werken",
   tagline: "De officiële standaard met gids, referentiedocumentatie en tools.",
   url: "https://vng-realisatie.github.io/",
+<<<<<<< Updated upstream
   baseUrl: "new-GEMMA-Zaken/",
+=======
+  baseUrl: "/new-GEMMA-Zaken",
+>>>>>>> Stashed changes
   onBrokenLinks: "throw",
   favicon: "img/favicon.ico",
 
@@ -266,22 +270,35 @@ export default async function createConfig(): Promise<Config> {
     config.themeConfig!.navbar = navbar;
   } catch (error) {
     console.warn("Kon externe navbar niet ophalen:", error);
+
     // Optioneel: fallback items
-    //config.themeConfig!.navbar!.items = [
     config.themeConfig!.navbar = {
-      navbar: {
-        title: "ZGW API's",
-        logo: {
-          alt: "VNG logo",
-          src: "img/vng_logo.svg",
-          srcDark: "img/vng_logo_alt.svg",
-        },
-        items: [
-          { label: "Fallback", to: "/" },
-	    ],
-	  },
+      title: "ZGW API's",
+      logo: {
+        alt: "VNG logo",
+        src: "img/vng_logo.svg",
+        srcDark: "img/vng_logo_alt.svg",
+      },
+      items: [
+        { label: "Fallback", to: "/" },
+      ],
     };
   }
 
+  // Lokale configuratie van tweede navigatiebalk
+  config.customFields = {
+    secondaryNavbarItems: [
+      { label: "ZGW API's", to: "/" },
+      { label: "Gids", to: "/gids/tools" },
+      { label: "API Suite", to: "/v1/next" },
+      { label: "Community", to: "/community" },
+    ],
+  };
+
   return config;
+<<<<<<< Updated upstream
 }
+=======
+
+}
+>>>>>>> Stashed changes
