@@ -28,3 +28,5 @@ jobs:
         run: npm run spectral
       - name: Build
         run: npm run build
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
