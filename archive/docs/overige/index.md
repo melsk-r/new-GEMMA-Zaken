@@ -1,4 +1,0 @@
----
-title: Overige
-layout: subjects
----

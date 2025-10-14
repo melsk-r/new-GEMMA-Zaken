@@ -1,4 +1,0 @@
----
-title: Technisch
-layout: subjects
----

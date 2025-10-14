@@ -1,4 +1,0 @@
----
-title: Bijeenkomsten
-layout: subjects
----
