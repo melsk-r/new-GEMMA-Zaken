@@ -13,11 +13,7 @@ const config: Config = {
   title: "API's voor zaakgericht werken",
   tagline: "De officiële standaard met gids, referentiedocumentatie en tools.",
   url: "https://vng-realisatie.github.io/",
-<<<<<<< Updated upstream
   baseUrl: "new-GEMMA-Zaken/",
-=======
-  baseUrl: "/new-GEMMA-Zaken",
->>>>>>> Stashed changes
   onBrokenLinks: "throw",
   favicon: "img/favicon.ico",
 
@@ -296,9 +292,4 @@ export default async function createConfig(): Promise<Config> {
   };
 
   return config;
-<<<<<<< Updated upstream
 }
-=======
-
-}
->>>>>>> Stashed changes
